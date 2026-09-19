@@ -1,0 +1,196 @@
+#include <iostream>
+#include <vector>
+#include <limits>
+#include <locale.h>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
+using namespace std;
+
+string lerNome(string mensagem) {
+    string nome;
+    while (true) {
+        cout << mensagem;
+        getline(cin, nome);
+
+        size_t pos = nome.find_last_not_of(' ');
+        if (pos != string::npos) {
+            nome.erase(pos + 1);
+        } else {
+            nome.clear();
+        }
+
+        if (nome.empty()) {
+            cout << "Nome inválido! Não pode ser vazio.\n";
+        } else {
+            return nome;
+        }
+    }
+}
+
+double lerNota(string mensagem) {
+    double nota;
+    while (true) {
+        cout << mensagem;
+        cin >> nota;
+
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Entrada inválida! Digite apenas números.\n";
+        } else {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return nota;
+        }
+    }
+}
+
+int lerOpcao(string mensagem, int min, int max) {
+    int opcao;
+    while (true) {
+        cout << mensagem;
+        cin >> opcao;
+
+        if (cin.fail() || opcao < min || opcao > max) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Opção inválida! Escolha um número entre " << min << " e " << max << ".\n";
+        } else {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return opcao;
+        }
+    }
+}
+
+void cadastrarAluno(vector<string>& nomes, vector<double>& notas1, vector<double>& notas2, vector<double>& medias) {
+	
+	system("cls");
+	
+    string nome = lerNome("Digite o nome do aluno: ");
+    double nota1 = lerNota("Digite a primeira nota do aluno: ");
+    double nota2 = lerNota("Digite a segunda nota do aluno: ");
+    double media = (nota1 + nota2) / 2;
+
+    nomes.push_back(nome);
+    notas1.push_back(nota1);
+    notas2.push_back(nota2);
+    medias.push_back(media);
+
+	system("cls");
+
+    cout << "Aluno cadastrado com sucesso!\n";
+}
+
+void exibirRelatorio(const vector<string>& nomes, const vector<double>& notas1, const vector<double>& notas2, const vector<double>& medias) {
+	
+	system("cls");
+	
+    if (nomes.empty()) {
+        cout << "\nNenhum aluno cadastrado ainda.\n";
+        return;
+    }
+
+    cout << "\n RELATÓRIO DE ALUNOS \n";
+    for (int i = 0; i < nomes.size(); i++) {
+        cout << nomes[i]
+             << " - Nota 1: " << notas1[i]
+             << " | Nota 2: " << notas2[i]
+             << " | Média: " << medias[i] << '\n';
+    }
+    cout << endl;
+}
+
+void salvarArquivo(const vector<string>& nomes, const vector<double>& notas1, const vector<double>& notas2, const vector<double>& medias) {
+    if (nomes.empty()) {
+        return; // nada para salvar
+    }
+
+    ofstream arquivo("alunos.txt");
+
+    if (!arquivo.is_open()) {
+        cout << "Erro ao criar o arquivo!\n";
+        return;
+    }
+
+    for (int i = 0; i < nomes.size(); i++) {
+        arquivo << nomes[i] << ";"
+                << notas1[i] << ";"
+                << notas2[i] << ";"
+                << medias[i] << "\n";
+    }
+
+    arquivo.close();
+}
+
+void carregarArquivo(vector<string>& nomes, vector<double>& notas1, vector<double>& notas2, vector<double>& medias) {
+    ifstream arquivo("alunos.txt");
+
+    if (!arquivo.is_open()) {
+        return;
+    }
+
+    string linha;
+    while (getline(arquivo, linha)) {
+        stringstream ss(linha);
+        string nome, campoNota1, campoNota2, campoMedia;
+
+        getline(ss, nome, ';');
+        getline(ss, campoNota1, ';');
+        getline(ss, campoNota2, ';');
+        getline(ss, campoMedia, ';');
+
+        double nota1 = stod(campoNota1);
+        double nota2 = stod(campoNota2);
+        double media = stod(campoMedia);
+
+        nomes.push_back(nome);
+        notas1.push_back(nota1);
+        notas2.push_back(nota2);
+        medias.push_back(media);
+    }
+
+    arquivo.close();
+    cout << nomes.size() << " aluno(s) carregado(s) do arquivo.\n";
+}
+
+void menu() {
+    cout << "\nRELATÓRIO DE ALUNOS\n";
+    cout << "1. Cadastrar aluno\n";
+    cout << "2. Relatório\n";
+    cout << "3. Encerrar programa\n";
+    cout << endl;
+}
+
+int main() {
+    setlocale(LC_ALL, "Portuguese");
+
+    vector<string> nomes;
+    vector<double> notas1;
+    vector<double> notas2;
+    vector<double> medias;
+
+    carregarArquivo(nomes, notas1, notas2, medias);
+
+    int opcao;
+
+    do {
+        menu();
+        opcao = lerOpcao("Escolha uma opção: ", 1, 3);
+
+        switch (opcao) {
+            case 1:
+                cadastrarAluno(nomes, notas1, notas2, medias);
+                break;
+            case 2:
+                exibirRelatorio(nomes, notas1, notas2, medias);
+                break;
+            case 3:
+                salvarArquivo(nomes, notas1, notas2, medias);
+                cout << "\nDados salvos. Encerrando o programa\n";
+                break;
+        }
+    } while (opcao != 3);
+
+    return 0;
+}
