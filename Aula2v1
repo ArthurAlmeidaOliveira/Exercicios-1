@@ -1,0 +1,61 @@
+#include <iostream>
+#include <limits>
+#include <locale.h>
+using namespace std;
+
+double lerDouble(string mensagem) { //função que lê números
+    double numero;
+    while (true) { //loop infinito
+        cout << mensagem;
+        cin >> numero;
+
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Digite números\n";
+        } else {
+            return numero;
+        }
+    }
+}
+
+double calcularMedia(double num1, double num2) { //função que calcula a média
+    return (num1 + num2) / 2;
+}
+
+bool perguntarContinuar() { //função que pergunta se o usuário quer continuar
+    char resposta;
+    while (true) {
+        cout << "\nDeseja calcular outra média? (s/n): ";
+        cin >> resposta;
+
+        if (resposta == 's' || resposta == 'S') {
+            return true;
+        } else if (resposta == 'n' || resposta == 'N') {
+            return false;
+        } else {
+            cout << "Resposta inválida! Digite 's' para sim ou 'n' para não.\n";
+        }
+    }
+}
+
+int main() {
+    setlocale(LC_ALL, "Portuguese");
+
+    bool continuar = true;
+
+    while (continuar) { //repete enquanto o usuário quiser
+        double num1 = lerDouble("Digite o primeiro número: ");
+        double num2 = lerDouble("Digite o segundo número: ");
+
+        double media = calcularMedia(num1, num2);
+
+        cout << "A média entre os dois números é: " << media << '\n';
+
+        continuar = perguntarContinuar();
+    }
+
+    cout << "\nEncerrando o programa. Até logo!\n";
+
+    return 0;
+}
